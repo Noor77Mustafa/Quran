@@ -5,7 +5,11 @@ echo "=============================================="
 
 # Generate icons
 echo "📱 Generating app icons..."
-node scripts/generate-icons.js
+if [ -f scripts/generate-icons.js ]; then
+  node scripts/generate-icons.js
+else
+  echo "Skipping icon generation (scripts/generate-icons.js not found)"
+fi
 
 # Build the application
 echo "🏗️  Building application..."
@@ -18,9 +22,17 @@ npm run check
 # Create deployment package
 echo "📦 Creating deployment package..."
 mkdir -p app-store-package
+if [ ! -d dist ]; then
+  echo "Error: build output directory 'dist' not found." >&2
+  exit 1
+fi
 cp -r dist/* app-store-package/
-cp public/manifest.json app-store-package/
-cp public/icon*.svg app-store-package/
+if [ -d public ]; then
+  cp public/manifest.json app-store-package/
+  cp public/icon*.svg app-store-package/
+else
+  echo "Warning: public directory not found, skipping manifest and icons" >&2
+fi
 cp app-store-config.json app-store-package/
 cp deploy-app-store.md app-store-package/
 
